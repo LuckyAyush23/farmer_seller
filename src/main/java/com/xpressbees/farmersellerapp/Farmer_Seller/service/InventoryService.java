@@ -2,15 +2,16 @@ package com.xpressbees.farmersellerapp.Farmer_Seller.service;
 
 import com.xpressbees.farmersellerapp.Farmer_Seller.Model.Inventory;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 public interface InventoryService {
     Inventory createInventory(Inventory inventory);
+    List<Inventory> getAllInventories();
     Optional<Inventory> getInventoryById(Long id);
     Inventory updateInventory(Long id, Inventory inventory);
     boolean deleteInventory(Long id);
     boolean deleteInventoryByVegetableName(String vegetableName);
     Inventory findInventoryByVegetableName(String vegetableName);
-    Inventory patchInventory(Long id, Map<String, Object> updates);
+    Inventory patchInventory(Long id, Inventory inventory);
 }
