@@ -6,7 +6,7 @@ import com.xpressbees.farmersellerapp.Farmer_Seller.exception.InventoryNotFoundE
 import com.xpressbees.farmersellerapp.Farmer_Seller.service.InventoryService;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,18 +21,24 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public Inventory createInventory(Inventory inventory) {
-        return inventoryRepository.save(inventory);
+        try {
+            return inventoryRepository.save(inventory);
+        }
+        catch (Exception ex){
+            throw new RuntimeException("Duplicate vegetable name , vegetable is already present");
+        }
     }
 
     @Override
-    public Optional<Inventory> getInventoryById(Long id) {
-        Optional<Inventory> inventory = inventoryRepository.findById(id);
-        if(inventory.isPresent()){
-            return inventory;
-        }
-        else{
-            throw new InventoryNotFoundException("Inventory not found for ID: " + id);
-        }
+    public List<Inventory> getAllInventories() {
+
+            return inventoryRepository.findAll();
+
+    }
+
+    @Override
+    public Inventory getInventoryById(Long id) {
+        return inventoryRepository.findById(id).orElseThrow(() -> new InventoryNotFoundException("Inventory not found for ID: " + id));
     }
 
     @Override
@@ -45,37 +51,42 @@ public class InventoryServiceImpl implements InventoryService {
             existingInventory.setVegetableName(inventory.getVegetableName());
             existingInventory.setVegetableStockLeft(inventory.getVegetableStockLeft());
             existingInventory.setPricePerKg(inventory.getPricePerKg());
-
-            return inventoryRepository.save(existingInventory);
+            try {
+                return inventoryRepository.save(existingInventory);
+            } catch (Exception e) {
+                throw new RuntimeException("Duplicate vegetable name , vegetable is already present");
+            }
         }
         return null;  // Return null if the item doesn't exist
     }
 
     @Override
-    public Inventory patchInventory(Long id, Map<String, Object> updates) {
-        // Find the existing inventory by ID
+    public Inventory patchInventory(Long id, Inventory updatedInventory) {
         Optional<Inventory> existingInventoryOptional = inventoryRepository.findById(id);
 
         if (existingInventoryOptional.isPresent()) {
             Inventory existingInventory = existingInventoryOptional.get();
 
-            // Update only the fields provided in the 'updates' map
-            if (updates.containsKey("vegetableName") && updates.get("vegetableName") != null) {
-                existingInventory.setVegetableName((String) updates.get("vegetableName"));
+            // Update only non-null fields from the request body
+            if (updatedInventory.getVegetableName() != null) {
+                existingInventory.setVegetableName(updatedInventory.getVegetableName());
             }
-            if (updates.containsKey("vegetableQuantity") && updates.get("vegetableQuantity") != null) {
-                existingInventory.setVegetableStockLeft((Integer) updates.get("vegetableQuantity"));
+            if (updatedInventory.getVegetableStockLeft() != 0) {
+                existingInventory.setVegetableStockLeft(updatedInventory.getVegetableStockLeft());
             }
-            if (updates.containsKey("pricePerKg") && updates.get("pricePerKg") != null) {
-                existingInventory.setPricePerKg((Double) updates.get("pricePerKg"));
+            if (updatedInventory.getPricePerKg() != null) {
+                existingInventory.setPricePerKg(updatedInventory.getPricePerKg());
             }
 
-            // Save the updated inventory back to the repository
-            return inventoryRepository.save(existingInventory);
+            try {
+                return inventoryRepository.save(existingInventory);
+            } catch (Exception e) {
+                throw new RuntimeException("Duplicate vegetable name , vegetable is already present");
+            }
         }
-
         return null; // Return null if inventory with the given ID doesn't exist
     }
+
 
     @Override
     public boolean deleteInventory(Long id) {

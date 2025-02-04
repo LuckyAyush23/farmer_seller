@@ -15,6 +15,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+//    @ExceptionHandler(DataIntegrityViolationException.class)
+//    public ResponseEntity<ApiResponse<String>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+//        String errorMessage = "Duplicate entry: A seller with the same email or phone number already exists.";
+//
+//        ApiResponse<String> response = new ApiResponse<>(500, errorMessage, null);
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+//    }
+
     @ExceptionHandler(InventoryNotFoundException.class)
     public ResponseEntity<ApiResponse<String>> handleInventoryNotFoundException(InventoryNotFoundException ex) {
         ApiResponse<String> response = new ApiResponse<>(HttpStatus.NOT_FOUND.value(), ex.getMessage(), null);

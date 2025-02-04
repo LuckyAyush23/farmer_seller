@@ -1,11 +1,8 @@
 package com.xpressbees.farmersellerapp.Farmer_Seller.Model;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.util.List;
 
 @Entity
 @Table(name = "sellers")
@@ -26,10 +23,6 @@ public class Seller {
     private String phone;
 
     private String sellerAddress;
-
-    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<PurchaseOrder> purchaseOrders;
 
 }
 

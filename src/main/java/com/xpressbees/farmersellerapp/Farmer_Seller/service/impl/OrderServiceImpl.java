@@ -69,10 +69,19 @@ public class OrderServiceImpl implements OrderService {
             Double totalPrice = updatedOrder.getQuantityPurchased() * inventory.getPricePerKg();
             updatedOrder.setTotalPrice(totalPrice);
 
-            int remainingQuantity = inventory.getVegetableStockLeft() - updatedOrder.getQuantityPurchased();
-            if (remainingQuantity < 0) {
-                throw new RuntimeException("Insufficient inventory quantity");
+            if(updatedOrder.getQuantityPurchased()>existingOrder.getQuantityPurchased()){
+                int remainingQuantity = updatedOrder.getQuantityPurchased() - existingOrder.getQuantityPurchased();
+                if (remainingQuantity > inventory.getVegetableStockLeft()) {
+                    throw new RuntimeException("Insufficient inventory quantity");
+                }
+                inventory.setVegetableStockLeft(inventory.getVegetableStockLeft()-remainingQuantity);
             }
+            else{
+                int remainingQuantity = existingOrder.getQuantityPurchased() - updatedOrder.getQuantityPurchased() ;
+                inventory.setVegetableStockLeft(inventory.getVegetableStockLeft()+remainingQuantity);
+            }
+
+
             existingOrder.setSeller(seller);
             existingOrder.setPurchasedInventory(inventory);
             existingOrder.setQuantityPurchased(updatedOrder.getQuantityPurchased());
@@ -82,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
             existingOrder.setTotalPrice(totalPrice);
             existingOrder.setInvoiceNumber(updatedOrder.getInvoiceNumber());
             existingOrder.setOrderDate(updatedOrder.getOrderDate());
-            inventory.setVegetableStockLeft(remainingQuantity);
+
             inventoryRepository.save(inventory);
             return orderRepository.save(existingOrder);
         }
@@ -92,6 +101,20 @@ public class OrderServiceImpl implements OrderService {
     public PurchaseOrder patchOrder(Long id, PurchaseOrder updatedOrder) {
         PurchaseOrder existingOrder = getOrderById(id);
         if(existingOrder!=null) {
+            Double totalPrice = updatedOrder.getQuantityPurchased() * existingOrder.getPurchasedInventory().getPricePerKg();
+            existingOrder.setTotalPrice(totalPrice);
+
+            if(updatedOrder.getQuantityPurchased()>existingOrder.getQuantityPurchased()){
+                int remainingQuantity = updatedOrder.getQuantityPurchased() - existingOrder.getQuantityPurchased();
+                if (remainingQuantity > existingOrder.getPurchasedInventory().getVegetableStockLeft()) {
+                    throw new RuntimeException("Insufficient inventory quantity");
+                }
+                existingOrder.getPurchasedInventory().setVegetableStockLeft(existingOrder.getPurchasedInventory().getVegetableStockLeft()-remainingQuantity);
+            }
+            else{
+                int remainingQuantity = existingOrder.getQuantityPurchased() - updatedOrder.getQuantityPurchased() ;
+                existingOrder.getPurchasedInventory().setVegetableStockLeft(existingOrder.getPurchasedInventory().getVegetableStockLeft()+remainingQuantity);
+            }
             if (updatedOrder.getBuyerName() != null) {
                 existingOrder.setBuyerName(updatedOrder.getBuyerName());
             }
@@ -101,18 +124,18 @@ public class OrderServiceImpl implements OrderService {
             if (updatedOrder.getShippingAddress() != null) {
                 existingOrder.setShippingAddress(updatedOrder.getShippingAddress());
             }
-            if (updatedOrder.getTotalPrice() != null) {
-                existingOrder.setTotalPrice(updatedOrder.getTotalPrice());
-            }
             if (updatedOrder.getInvoiceNumber() != null) {
                 existingOrder.setInvoiceNumber(updatedOrder.getInvoiceNumber());
             }
             if (updatedOrder.getQuantityPurchased() != null) {
                 existingOrder.setQuantityPurchased(updatedOrder.getQuantityPurchased());
             }
+            inventoryRepository.save(existingOrder.getPurchasedInventory());
             return orderRepository.save(existingOrder);
         }
-        return null;
+        else{
+            throw new RuntimeException("order not found");
+        }
     }
 
     public boolean deleteOrderById(Long id) {
