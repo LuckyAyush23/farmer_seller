@@ -1,6 +1,6 @@
 package com.xpressbees.farmersellerapp.Farmer_Seller.exception;
 
-import com.xpressbees.farmersellerapp.Farmer_Seller.Util.ApiResponse;
+import com.xpressbees.farmersellerapp.Farmer_Seller.Util.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<String>> handleException(Exception ex) {
-        ApiResponse<String> response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred: " + ex.getMessage(), null);
+    public ResponseEntity<ApiResponses<String>> handleException(Exception ex) {
+        ApiResponses<String> response = new ApiResponses<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred: " + ex.getMessage(), null);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -24,8 +24,8 @@ public class GlobalExceptionHandler {
 //    }
 
     @ExceptionHandler(InventoryNotFoundException.class)
-    public ResponseEntity<ApiResponse<String>> handleInventoryNotFoundException(InventoryNotFoundException ex) {
-        ApiResponse<String> response = new ApiResponse<>(HttpStatus.NOT_FOUND.value(), ex.getMessage(), null);
+    public ResponseEntity<ApiResponses<String>> handleInventoryNotFoundException(InventoryNotFoundException ex) {
+        ApiResponses<String> response = new ApiResponses<>(HttpStatus.NOT_FOUND.value(), ex.getMessage(), null);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
